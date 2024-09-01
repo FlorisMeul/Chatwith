@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Chatwith ATS Integratie API
+  description: Een API om Chatwith te koppelen aan een ATS-systeem voor het ophalen van vacatures en het versturen van kandidaatgegevens inclusief chatgeschiedenis.
+  version: 1.0.0
+
+servers:
+  - url: https://api.atsprovider.com/v1
+    description: Basis-URL van het ATS-systeem
+
+paths:
+  /vacatures:
+    get:
+      summary: Haal alle vacatures op
+      description: Haalt een lijst van alle beschikbare vacatures op uit het ATS-systeem.
+      operationId: haalVacaturesOp
+      responses:
+        '200':
+          description: Succesvolle respons met een lijst van vacatures.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Unieke ID van de vacature
+                    titel:
+                      type: string
+                      description: Titel van de vacature
+                    beschrijving:
+                      type: string
+                      description: Beschrijving van de vacature
+                    locatie:
+                      type: string
+                      description: Locatie van de vacature
+        '401':
+          description: Ongeautoriseerd. Controleer de API-sleutel.
+        '500':
+          description: Interne serverfout.
+
+  /candidates:
+    post:
+      summary: Maak een nieuwe kandidaat aan
+      description: Verzendt de kandidaatgegevens naar het ATS, inclusief de chatgeschiedenis van de gebruiker.
+      operationId: stuurKandidaatGegevens
+      requestBody:
+        description: Kandidaatgegevens om naar het ATS te sturen
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Naam van de kandidaat
+                email:
+                  type: string
+                  description: E-mailadres van de kandidaat
+                phone:
+                  type: string
+                  description: Telefoonnummer van de kandidaat
+                resume:
+                  type: string
+                  description: Link naar het CV van de kandidaat
+                chatHistory:
+                  type: array
+                  items:
+                    type: string
+                  description: Een array van strings die de volledige chatgeschiedenis bevatten
+      responses:
+        '200':
+          description: Succesvolle respons met bevestiging van de aangemaakte kandidaat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Bevestigingsbericht
+                  candidateId:
+                    type: string
+                    description: Unieke ID van de aangemaakte kandidaat
+        '400':
+          description: Foutieve aanvraag. Controleer de ingevoerde gegevens.
+        '401':
+          description: Ongeautoriseerd. Controleer de API-sleutel.
+        '500':
+          description: Interne serverfout.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
